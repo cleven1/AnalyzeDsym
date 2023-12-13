@@ -71,7 +71,7 @@ struct ContentView: View {
             HStack {
                 ScrollView(.vertical) {
                     Text(result).font(.system(size: 16))
-                }.frame(minHeight: 150, maxHeight: 300)
+                }.frame(minHeight: 150, maxHeight: .infinity)
                 Spacer()
             }
         }
