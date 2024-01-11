@@ -31,7 +31,7 @@ struct ContentView: View {
                                 allowedContentTypes: [.item],
                                 onCompletion: { result in
                                     do {
-                                        dsymFile = try result.get().path().replacingOccurrences(of: "dSYM/", with: "dSYM")
+                                        dsymFile = try result.get().path().replacingOccurrences(of: "dSYM/", with: "dSYM").trimmingCharacters(in: .whitespacesAndNewlines)
                                         
                                         // 处理文件
                                     } catch {
@@ -55,7 +55,7 @@ struct ContentView: View {
                                 allowedContentTypes: [.text],
                                 onCompletion: { result in
                                     do {
-                                        ipsFile = try result.get().path().replacingOccurrences(of: " ", with: "_")
+                                        ipsFile = try result.get().path().trimmingCharacters(in: .whitespacesAndNewlines)
                                         // 处理文件
                                     } catch {
                                         // 处理错误
@@ -81,6 +81,22 @@ struct ContentView: View {
     
     private func analyzeHandler() {
         result = "解析中..."
+        if dsymFile.contains(where: { $0.isWhitespace }) {
+            result = "dSYM文件路径中存在空格,请修改"
+            return
+        }
+        if ipsFile.contains("%") {
+            result = "crash文件路径中存在空格,请修改"
+            return
+        }
+        if !FileManager.default.fileExists(atPath: dsymFile) {
+            result = "dSYM文件不存在, 请检查路径"
+            return
+        }
+        if !FileManager.default.fileExists(atPath: ipsFile) {
+            result = "crash文件不存在, 请检查路径"
+            return
+        }
         guard let scriptPath = Bundle.main.path(forResource: "Analyze", ofType: "sh") else { return }
         Task {
             let script = scriptPath + " \(dsymFile) \(ipsFile)"
